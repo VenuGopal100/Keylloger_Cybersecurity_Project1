@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keylogger Simulation - Cybersecurity Training</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4e54c8;
+            --secondary: #8f94fb;
+            --dark: #333;
+            --darker: #222;
+            --light: #f0f2f5;
+            --white: #fff;
+            --gray: #a0a0a0;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --info: #3498db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        nav {
+            background: var(--darker);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: rgba(30, 30, 46, 0.8);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .input-area {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        #safe-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+
+        #safe-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.3);
+        }
+
+        #safe-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .log-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            height: 300px;
+            overflow-y: auto;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .log-entry {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid var(--info);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .log-content {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-time {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .key-highlight {
+            color: var(--warning);
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+        }
+
+        .info-panel {
+            margin-top: 2rem;
+        }
+
+        .info-content {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--warning);
+        }
+
+        .info-content h3 {
+            margin-bottom: 1rem;
+            color: var(--warning);
+        }
+
+        .info-content ul {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .warning {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        /* Scrollbar styling */
+        .log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        footer {
+            background: var(--darker);
+            color: white;
+            padding: 2rem;
+            margin-top: 3rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .disclaimer {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 1rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-keyboard"></i>
+                <div>
+                    <h1>Keylogger Simulation</h1>
+                    <div class="subtitle">Cybersecurity Training Tool</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-links">
+            <a href="{{ url_for('selection') }}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-laptop-code"></i> Interactive Simulation</h2>
+                    <div class="card-icon">
+                        <i class="fas fa-keyboard"></i>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="keys-logged">0</div>
+                        <div class="stat-label">Keys Logged</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="sessions">1</div>
+                        <div class="stat-label">Active Session</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="risk-level">Low</div>
+                        <div class="stat-label">Risk Level</div>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <label class="input-label" for="safe-input">Type anything in the box below to simulate keylogging:</label>
+                    <input type="text" id="safe-input" placeholder="Type here to see how keyloggers capture input...">
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="startLogging()">
+                        <i class="fas fa-play"></i> Start Logging
+                    </button>
+                    <button class="btn btn-danger" onclick="clearLog()">
+                        <i class="fas fa-trash"></i> Clear Log
+                    </button>
+                    <button class="btn btn-success" onclick="exportLog()">
+                        <i class="fas fa-download"></i> Export Log
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-scroll"></i> Key Log</h2>
+                    <div class="card-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                </div>
+
+                <div class="log-container" id="log">
+                    <div class="log-entry">
+                        <div class="log-content">Keylogger simulation started. Session ID: <span class="key-highlight">KL-2023-001</span></div>
+                        <div class="log-time" id="current-time">00:00:00</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="simulateTyping()">
+                        <i class="fas fa-robot"></i> Simulate Typing
+                    </button>
+                    <button class="btn btn-danger" onclick="simulateAttack()">
+                        <i class="fas fa-shield-alt"></i> Simulate Attack
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-content">
+                <h3><i class="fas fa-info-circle"></i> About Keyloggers</h3>
+                <p>This simulation demonstrates how keyloggers work. In a real scenario, keyloggers can be used by cybercriminals to capture sensitive information like passwords and credit card numbers.</p>
+
+                <h4>How to Protect Yourself:</h4>
+                <ul>
+                    <li>Use antivirus software with real-time protection</li>
+                    <li>Keep your operating system and software updated</li>
+                    <li>Avoid downloading software from untrusted sources</li>
+                    <li>Use two-factor authentication when available</li>
+                    <li>Be cautious of phishing attempts</li>
+                </ul>
+
+                <p class="warning"><i class="fas fa-exclamation-triangle"></i> This is a simulation for educational purposes only. No actual keylogging is occurring.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>Cybersecurity Training Tool &copy; 2023</p>
+            <p class="disclaimer">This tool is designed for educational purposes to demonstrate cybersecurity concepts. It does not perform actual keylogging or capture any sensitive information.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize variables
+        let keysLogged = 0;
+        let isLogging = true;
+        let sessionStartTime = new Date();
+
+        const logContainer = document.getElementById("log");
+        const safeInput = document.getElementById("safe-input");
+        const keysLoggedElement = document.getElementById("keys-logged");
+        const riskLevelElement = document.getElementById("risk-level");
+        const currentTimeElement = document.getElementById("current-time");
+
+        // Update current time
+        function updateCurrentTime() {
+            const now = new Date();
+            currentTimeElement.textContent = now.toLocaleTimeString();
+        }
+
+        // Update time every second
+        setInterval(updateCurrentTime, 1000);
+        updateCurrentTime();
+
+        // Add a log entry
+        function addLogEntry(content, isWarning = false) {
+            const logEntry = document.createElement("div");
+            logEntry.classList.add("log-entry");
+
+            if (isWarning) {
+                logEntry.style.borderLeftColor = "var(--warning)";
+            }
+
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+
+            logEntry.innerHTML = `
+                <div class="log-content">${content}</div>
+                <div class="log-time">${timeString}</div>
+            `;
+
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Start logging function
+        function startLogging() {
+            isLogging = true;
+            safeInput.disabled = false;
+            safeInput.focus();
+            addLogEntry("Keylogging simulation <span class='key-highlight'>activated</span>.");
+        }
+
+        // Stop logging function
+        function stopLogging() {
+            isLogging = false;
+            safeInput.disabled = true;
+            addLogEntry("Keylogging simulation <span class='key-highlight'>paused</span>.", true);
+        }
+
+        // Clear log function
+        function clearLog() {
+            logContainer.innerHTML = '';
+            keysLogged = 0;
+            keysLoggedElement.textContent = keysLogged;
+            riskLevelElement.textContent = "Low";
+            riskLevelElement.style.color = "var(--success)";
+            addLogEntry("Log cleared. Keylogging simulation <span class='key-highlight'>restarted</span>.");
+        }
+
+        // Export log function
+        function exportLog() {
+            addLogEntry("Log export <span class='key-highlight'>simulated</span>. In a real scenario, this would save captured data.");
+            alert("Simulation: Log exported successfully. In a real keylogger, this would save the captured keystrokes to a file.");
+        }
+
+        // Simulate typing function
+        function simulateTyping() {
+            const sampleTexts = [
+                "Hello, this is a test of the keylogger simulation.",
+                "My email is user@example.com and my password is ********",
+                "Credit card: 1234 5678 9012 3456 Exp: 12/25 CVV: 123",
+                "The quick brown fox jumps over the lazy dog."
+            ];
+
+            const randomText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
+
+            addLogEntry(`Simulated typing: <span class="key-highlight">"${randomText}"</span>`);
+
+            // Update stats
+            keysLogged += randomText.length;
+            keysLoggedElement.textContent = keysLogged;
+
+            // Update risk level based on keys logged
+            updateRiskLevel();
+        }
+
+        // Simulate attack function
+        function simulateAttack() {
+            addLogEntry("Potential <span class='key-highlight'>malicious activity</span> detected: Password field targeted.", true);
+            addLogEntry("Simulated <span class='key-highlight'>data exfiltration</span> attempt blocked.", true);
+
+            riskLevelElement.textContent = "High";
+            riskLevelElement.style.color = "var(--danger)";
+        }
+
+        // Update risk level based on keys logged
+        function updateRiskLevel() {
+            if (keysLogged > 100) {
+                riskLevelElement.textContent = "High";
+                riskLevelElement.style.color = "var(--danger)";
+            } else if (keysLogged > 50) {
+                riskLevelElement.textContent = "Medium";
+                riskLevelElement.style.color = "var(--warning)";
+            } else {
+                riskLevelElement.textContent = "Low";
+                riskLevelElement.style.color = "var(--success)";
+            }
+        }
+
+        // Handle input events
+        safeInput.addEventListener("input", (e) => {
+            if (!isLogging) return;
+
+            const inputText = e.target.value;
+
+            if (inputText.length > 0) {
+                // Log each character individually for realism
+                const lastChar = inputText.charAt(inputText.length - 1);
+
+                // Special formatting for certain keys
+                let displayChar = lastChar;
+                if (lastChar === ' ') {
+                    displayChar = '[SPACE]';
+                } else if (lastChar === '\n') {
+                    displayChar = '[ENTER]';
+                } else if (lastChar === '\t') {
+                    displayChar = '[TAB]';
+                }
+
+                addLogEntry(`Key pressed: <span class="key-highlight">${displayChar}</span>`);
+
+                // Update stats
+                keysLogged++;
+                keysLoggedElement.textContent = keysLogged;
+
+                // Update risk level
+                updateRiskLevel();
+
+                // Clear input after logging
+                e.target.value = '';
+            }
+        });
+
+        // Also capture keyboard events for more realism
+        document.addEventListener("keydown", (e) => {
+            if (!isLogging) return;
+
+            // Ignore if the input is focused (to avoid double logging)
+            if (document.activeElement === safeInput) return;
+
+            // Log special keys
+            if (e.key === 'Enter') {
+                addLogEntry(`Key pressed: <span class="key-highlight">[ENTER]</span>`);
+                keysLogged++;
+            } else if (e.key === 'Tab') {
+                addLogEntry(`Key pressed: <span class="key-highlight">[TAB]</span>`);
+                keysLogged++;
+            } else if (e.key === 'Escape') {
+                addLogEntry(`Key pressed: <span class="key-highlight">[ESC]</span>`);
+                keysLogged++;
+            } else if (e.key.length === 1) {
+                // Regular character keys
+                addLogEntry(`Key pressed: <span class="key-highlight">${e.key}</span>`);
+                keysLogged++;
+            }
+
+            keysLoggedElement.textContent = keysLogged;
+            updateRiskLevel();
+        });
+
+        // Initialize the simulation
+        window.onload = function() {
+            addLogEntry("Keylogger simulation <span class='key-highlight'>initialized</span>. Start typing to see how keyloggers work.");
+            safeInput.focus();
+        };
+    </script>
+</body>
+</html>

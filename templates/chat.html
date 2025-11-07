@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Simulation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4e54c8;
+            --secondary: #8f94fb;
+            --dark: #333;
+            --light: #f0f2f5;
+            --white: #fff;
+            --gray: #a0a0a0;
+            --user-msg: #dcf8c6;
+            --friend-msg: #fff;
+            --typing-indicator: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light);
+            color: #333;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.2rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        nav {
+            background: var(--dark);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-links a:hover {
+            color: var(--secondary);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            height: calc(100vh - 140px);
+            background: var(--white);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-header {
+            padding: 1rem 1.5rem;
+            background: var(--white);
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .friend-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .friend-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 3px;
+        }
+
+        .friend-info p {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .friend-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+            margin-left: auto;
+        }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 15px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: var(--user-msg);
+            border-bottom-right-radius: 5px;
+        }
+
+        .friend-message {
+            align-self: flex-start;
+            background: var(--friend-msg);
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--gray);
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .friend-message .message-time {
+            text-align: left;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: var(--typing-indicator);
+            padding: 10px 15px;
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--gray);
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(1) { animation-delay: 0s; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        .input-area {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid #e0e0e0;
+            background: var(--white);
+            gap: 10px;
+        }
+
+        #msg-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 24px;
+            outline: none;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+
+        #msg-input:focus {
+            border-color: var(--primary);
+        }
+
+        .send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .send-btn:hover {
+            background: var(--secondary);
+        }
+
+        .message-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .option-btn {
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            border-radius: 15px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .option-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Scrollbar styling */
+        #messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #messages::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        #messages::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: calc(100vh - 120px);
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            header {
+                padding: 1rem;
+            }
+
+            nav {
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-comments"></i>
+                <h1>Chat Simulation</h1>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-links">
+            <a href="{{ url_for('selection') }}"><i class="fas fa-arrow-left"></i> Back</a>
+            <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="friend-avatar">J</div>
+            <div class="friend-info">
+                <h3>Jordan Smith</h3>
+                <p>Last seen today at 10:30 AM</p>
+            </div>
+            <div class="friend-status" title="Online"></div>
+        </div>
+
+        <div id="messages">
+            <!-- Initial messages will be loaded here -->
+        </div>
+
+        <div class="typing-indicator">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="msg-input" placeholder="Type a message..." autocomplete="off">
+            <button class="send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Friend responses database
+        const friendResponses = [
+            "That's interesting! Tell me more about that.",
+            "I see what you mean. How do you feel about it?",
+            "I had a similar experience recently.",
+            "Thanks for sharing that with me.",
+            "What are your plans for the weekend?",
+            "I've been thinking about that too.",
+            "That sounds exciting!",
+            "I'm not sure about that, what do you think?",
+            "Have you seen the latest movie?",
+            "I agree with you on that point.",
+            "That's a good question. Let me think...",
+            "How's your day going so far?",
+            "I remember when we talked about this before.",
+            "That's funny!",
+            "I understand how you feel.",
+            "What made you think of that?",
+            "I've been meaning to ask you about that.",
+            "That's a great idea!",
+            "I'm not sure I follow, can you explain?",
+            "Let's catch up soon in person!"
+        ];
+
+        // Conversation starters
+        const initialMessages = [
+            { sender: "friend", text: "Hey there! How's it going?", time: "10:15 AM" },
+            { sender: "friend", text: "I was just thinking about our conversation yesterday.", time: "10:16 AM" },
+            { sender: "user", text: "Hi! I'm doing well, thanks for asking. How about you?", time: "10:20 AM" },
+            { sender: "friend", text: "I'm good! Just finished up some work. What are you up to?", time: "10:21 AM" }
+        ];
+
+        const messagesContainer = document.getElementById("messages");
+        const msgInput = document.getElementById("msg-input");
+        const typingIndicator = document.querySelector(".typing-indicator");
+
+        // Format time
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Add a message to the chat
+        function addMessage(sender, text, time) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message");
+            messageDiv.classList.add(sender === "user" ? "user-message" : "friend-message");
+
+            messageDiv.innerHTML = `
+                <div>${text}</div>
+                <div class="message-time">${time}</div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            typingIndicator.style.display = "block";
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            typingIndicator.style.display = "none";
+        }
+
+        // Get a realistic response from the friend
+        function getFriendResponse(userMessage) {
+            // Simple keyword matching for more contextual responses
+            const lowerMsg = userMessage.toLowerCase();
+
+            if (lowerMsg.includes("how are you") || lowerMsg.includes("how's it going")) {
+                return "I'm doing well, thanks for asking! How about you?";
+            } else if (lowerMsg.includes("thank") || lowerMsg.includes("thanks")) {
+                return "You're welcome!";
+            } else if (lowerMsg.includes("sorry")) {
+                return "No problem at all!";
+            } else if (lowerMsg.includes("yes") || lowerMsg.includes("yeah")) {
+                return "Great! I'm glad to hear that.";
+            } else if (lowerMsg.includes("no") || lowerMsg.includes("not really")) {
+                return "I understand. Maybe we can figure something out.";
+            } else if (lowerMsg.includes("?")) {
+                return "That's a good question. Let me think about that...";
+            } else if (lowerMsg.includes("happy") || lowerMsg.includes("excited")) {
+                return "That's awesome! I'm happy for you.";
+            } else if (lowerMsg.includes("sad") || lowerMsg.includes("upset")) {
+                return "I'm sorry to hear that. Is there anything I can do?";
+            }
+
+            // Default to a random response if no keywords match
+            return friendResponses[Math.floor(Math.random() * friendResponses.length)];
+        }
+
+        // Send a message
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            if (text !== "") {
+                const time = getCurrentTime();
+                addMessage("user", text, time);
+                msgInput.value = "";
+
+                // Show typing indicator
+                showTypingIndicator();
+
+                // Generate a response after a delay
+                const delay = 1000 + Math.random() * 2000; // 1-3 seconds delay
+
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    const response = getFriendResponse(text);
+                    const responseTime = getCurrentTime();
+                    addMessage("friend", response, responseTime);
+                }, delay);
+            }
+        }
+
+        // Allow sending message with Enter key
+        msgInput.addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        });
+
+        // Initialize the chat with some messages
+        window.onload = function() {
+            initialMessages.forEach(msg => {
+                addMessage(msg.sender, msg.text, msg.time);
+            });
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        };
+    </script>
+</body>
+</html>

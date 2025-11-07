@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure On-Screen Keyboard</title>
+    <style>
+        .keyboard-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        .keyboard-container {
+            background: #2c3e50;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 800px;
+            width: 90%;
+        }
+        .keyboard-header {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+            gap: 5px;
+        }
+        .keyboard-key {
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            min-width: 50px;
+            transition: all 0.2s;
+        }
+        .keyboard-key:hover {
+            background: #3498db;
+            transform: translateY(-2px);
+        }
+        .keyboard-key:active {
+            background: #2980b9;
+            transform: translateY(0);
+        }
+        .keyboard-key.space {
+            min-width: 300px;
+        }
+        .keyboard-key.backspace {
+            background: #e74c3c;
+        }
+        .keyboard-key.enter {
+            background: #27ae60;
+        }
+        .keyboard-key.close {
+            background: #95a5a6;
+        }
+        .keyboard-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            margin-bottom: 15px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            background: #ecf0f1;
+        }
+        .security-badge {
+            background: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="keyboard-overlay" id="keyboardOverlay">
+        <div class="keyboard-container">
+            <div class="keyboard-header">
+                <h2>🛡️ Secure On-Screen Keyboard <span class="security-badge">PROTECTED</span></h2>
+                <p>Use this keyboard for sensitive information to prevent keylogging</p>
+            </div>
+
+            <input type="text" class="keyboard-input" id="keyboardInput" readonly placeholder="Type using the keyboard below...">
+
+            <!-- First Row -->
+            <div class="keyboard-row">
+                <button class="keyboard-key" data-key="1">1</button>
+                <button class="keyboard-key" data-key="2">2</button>
+                <button class="keyboard-key" data-key="3">3</button>
+                <button class="keyboard-key" data-key="4">4</button>
+                <button class="keyboard-key" data-key="5">5</button>
+                <button class="keyboard-key" data-key="6">6</button>
+                <button class="keyboard-key" data-key="7">7</button>
+                <button class="keyboard-key" data-key="8">8</button>
+                <button class="keyboard-key" data-key="9">9</button>
+                <button class="keyboard-key" data-key="0">0</button>
+                <button class="keyboard-key backspace" data-key="backspace">⌫</button>
+            </div>
+
+            <!-- Second Row -->
+            <div class="keyboard-row">
+                <button class="keyboard-key" data-key="q">q</button>
+                <button class="keyboard-key" data-key="w">w</button>
+                <button class="keyboard-key" data-key="e">e</button>
+                <button class="keyboard-key" data-key="r">r</button>
+                <button class="keyboard-key" data-key="t">t</button>
+                <button class="keyboard-key" data-key="y">y</button>
+                <button class="keyboard-key" data-key="u">u</button>
+                <button class="keyboard-key" data-key="i">i</button>
+                <button class="keyboard-key" data-key="o">o</button>
+                <button class="keyboard-key" data-key="p">p</button>
+            </div>
+
+            <!-- Third Row -->
+            <div class="keyboard-row">
+                <button class="keyboard-key" data-key="a">a</button>
+                <button class="keyboard-key" data-key="s">s</button>
+                <button class="keyboard-key" data-key="d">d</button>
+                <button class="keyboard-key" data-key="f">f</button>
+                <button class="keyboard-key" data-key="g">g</button>
+                <button class="keyboard-key" data-key="h">h</button>
+                <button class="keyboard-key" data-key="j">j</button>
+                <button class="keyboard-key" data-key="k">k</button>
+                <button class="keyboard-key" data-key="l">l</button>
+                <button class="keyboard-key enter" data-key="enter">↵</button>
+            </div>
+
+            <!-- Fourth Row -->
+            <div class="keyboard-row">
+                <button class="keyboard-key" data-key="z">z</button>
+                <button class="keyboard-key" data-key="x">x</button>
+                <button class="keyboard-key" data-key="c">c</button>
+                <button class="keyboard-key" data-key="v">v</button>
+                <button class="keyboard-key" data-key="b">b</button>
+                <button class="keyboard-key" data-key="n">n</button>
+                <button class="keyboard-key" data-key="m">m</button>
+                <button class="keyboard-key" data-key=",">,</button>
+                <button class="keyboard-key" data-key=".">.</button>
+                <button class="keyboard-key" data-key="/">/</button>
+            </div>
+
+            <!-- Fifth Row -->
+            <div class="keyboard-row">
+                <button class="keyboard-key space" data-key=" ">Space</button>
+                <button class="keyboard-key close" onclick="closeKeyboard()">Close Keyboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentInputField = null;
+        let originalType = null;
+
+        function showOnScreenKeyboard(inputField) {
+            currentInputField = inputField;
+            originalType = inputField.type;
+
+            // Change to text type to show what we're typing
+            inputField.type = 'text';
+
+            const overlay = document.getElementById('keyboardOverlay');
+            const keyboardInput = document.getElementById('keyboardInput');
+
+            keyboardInput.value = inputField.value;
+            overlay.style.display = 'flex';
+
+            // Notify security dashboard
+            fetch('/detect-sensitive-field', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    type: inputField.type,
+                    name: inputField.name,
+                    id: inputField.id,
+                    placeholder: inputField.placeholder
+                })
+            });
+        }
+
+        function closeKeyboard() {
+            const overlay = document.getElementById('keyboardOverlay');
+            overlay.style.display = 'none';
+
+            if (currentInputField && originalType) {
+                currentInputField.type = originalType;
+            }
+            currentInputField = null;
+        }
+
+        function insertKey(key) {
+            const keyboardInput = document.getElementById('keyboardInput');
+
+            if (key === 'backspace') {
+                keyboardInput.value = keyboardInput.value.slice(0, -1);
+            } else if (key === 'enter') {
+                if (currentInputField) {
+                    currentInputField.value = keyboardInput.value;
+                }
+                closeKeyboard();
+            } else if (key === ' ') {
+                keyboardInput.value += ' ';
+            } else {
+                keyboardInput.value += key;
+            }
+
+            // Update the original field in real-time
+            if (currentInputField) {
+                currentInputField.value = keyboardInput.value;
+            }
+        }
+
+        // Add event listeners to keyboard keys
+        document.addEventListener('DOMContentLoaded', function() {
+            const keys = document.querySelectorAll('.keyboard-key[data-key]');
+            keys.forEach(key => {
+                key.addEventListener('click', function() {
+                    insertKey(this.getAttribute('data-key'));
+                });
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeKeyboard();
+                }
+            });
+
+            // Close when clicking outside
+            document.getElementById('keyboardOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeKeyboard();
+                }
+            });
+        });
+
+        // Auto-detect password fields and add on-screen keyboard option
+        function enableOnScreenKeyboardDetection() {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) { // Element node
+                            const inputs = node.querySelectorAll ? node.querySelectorAll('input[type="password"], input[name*="password"], input[name*="pwd"], input[name*="pin"], input[name*="cvv"]') : [];
+                            inputs.forEach(setupOnScreenKeyboard);
+                        }
+                    });
+                });
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+
+            // Setup existing inputs
+            document.querySelectorAll('input[type="password"], input[name*="password"], input[name*="pwd"], input[name*="pin"], input[name*="cvv"]').forEach(setupOnScreenKeyboard);
+        }
+
+        function setupOnScreenKeyboard(input) {
+            // Add secure keyboard button
+            if (!input.parentNode.querySelector('.keyboard-btn')) {
+                const keyboardBtn = document.createElement('button');
+                keyboardBtn.type = 'button';
+                keyboardBtn.className = 'keyboard-btn';
+                keyboardBtn.innerHTML = '🛡️';
+                keyboardBtn.title = 'Use Secure On-Screen Keyboard';
+                keyboardBtn.style.cssText = `
+                    background: #27ae60;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    padding: 5px 10px;
+                    margin-left: 5px;
+                    cursor: pointer;
+                    font-size: 14px;
+                `;
+                keyboardBtn.onclick = () => showOnScreenKeyboard(input);
+
+                input.parentNode.insertBefore(keyboardBtn, input.nextSibling);
+            }
+
+            // Add focus event to show warning
+            input.addEventListener('focus', function() {
+                const warning = document.createElement('div');
+                warning.className = 'keyboard-warning';
+                warning.innerHTML = '🛡️ <strong>Security Tip:</strong> Use on-screen keyboard to prevent keylogging';
+                warning.style.cssText = `
+                    background: #fff3cd;
+                    border: 1px solid #ffeaa7;
+                    border-radius: 4px;
+                    padding: 8px;
+                    margin-top: 5px;
+                    font-size: 12px;
+                    color: #856404;
+                `;
+
+                if (!this.parentNode.querySelector('.keyboard-warning')) {
+                    this.parentNode.appendChild(warning);
+                }
+            });
+
+            input.addEventListener('blur', function() {
+                const warning = this.parentNode.querySelector('.keyboard-warning');
+                if (warning) {
+                    warning.remove();
+                }
+            });
+        }
+
+        // Initialize when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', enableOnScreenKeyboardDetection);
+        } else {
+            enableOnScreenKeyboardDetection();
+        }
+    </script>
+</body>
+</html>
